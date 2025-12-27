@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Music Player</title>
+  <link rel="stylesheet" href="music.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <div class="placeholder">
+        🎶 Music Player
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <h2>Now Playing</h2>
+      <h3 id="songTitle">Blinding Lights</h3>
+      <p id="artistName">The Weeknd</p>
+      <p id="albumName">After Hours</p>
+
+      <div class="progress">
+        <span id="currentTime">0:00</span>
+        <input type="range" id="seekBar" value="0" />
+        <span id="totalTime">3:20</span>
+      </div>
+
+      <div class="controls">
+        <button id="shuffleBtn">🔀</button>
+        <button id="prevBtn">⏮️</button>
+        <button id="playPauseBtn">▶️</button>
+        <button id="nextBtn">⏭️</button>
+        <button id="repeatBtn">🔁</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audioPlayer" src="audio/blinding-lights.mp3"></audio>
+
+  <script>
+    const playlist = [
+      {
+        title: "Blinding Lights",
+        artist: "The Weeknd",
+        album: "After Hours",
+        src: "audio/blinding-lights.mp3",
+        duration: "3:20"
+      },
+      {
+        title: "All the Stars",
+        artist: "Kendrick Lamar & SZA",
+        album: "Black Panther",
+        src: "audio/all-the-stars.mp3",
+        duration: "3:55"
+      },
+      {
+        title: "Stay",
+        artist: "The Kid LAROI & Justin Bieber",
+        album: "F*CK LOVE 3",
+        src: "audio/stay.mp3",
+        duration: "2:40"
+      },
+      {
+        title: "Sunflower",
+        artist: "Post Malone & Swae Lee",
+        album: "Spider-Verse",
+        src: "audio/sunflower.mp3",
+        duration: "2:38"
+      }
+    ];
+
+    let currentIndex = 0;
+    const audio = document.getElementById("audioPlayer");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const seekBar = document.getElementById("seekBar");
+    const currentTime = document.getElementById("currentTime");
+    const totalTime = document.getElementById("totalTime");
+
+    const songTitle = document.getElementById("songTitle");
+    const artistName = document.getElementById("artistName");
+    const albumName = document.getElementById("albumName");
+
+    let isPlaying = false;
+    let isRepeat = false;
+    let isShuffle = false;
+
+    function loadSong(index) {
+      const song = playlist[index];
+      audio.src = song.src;
+      songTitle.textContent = song.title;
+      artistName.textContent = song.artist;
+      albumName.textContent = song.album;
+      totalTime.textContent = song.duration;
+      seekBar.value = 0;
+    }
+
+    function playPause() {
+      if (isPlaying) {
+        audio.pause();
+        playPauseBtn.textContent = "▶️";
+      } else {
+        audio.play();
+        playPauseBtn.textContent = "⏸️";
+      }
+      isPlaying = !isPlaying;
+    }
+
+    function nextSong() {
+      currentIndex = isShuffle ? Math.floor(Math.random() * playlist.length) : (currentIndex + 1) % playlist.length;
+      loadSong(currentIndex);
+      audio.play();
+      isPlaying = true;
+      playPauseBtn.textContent = "⏸️";
+    }
+
+    function prevSong() {
+      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      loadSong(currentIndex);
+      audio.play();
+      isPlaying = true;
+      playPauseBtn.textContent = "⏸️";
+    }
+
+    function toggleRepeat() {
+      isRepeat = !isRepeat;
+      repeatBtn.classList.toggle("active", isRepeat);
+    }
+
+    function toggleShuffle() {
+      isShuffle = !isShuffle;
+      shuffleBtn.classList.toggle("active", isShuffle);
+    }
+
+    audio.addEventListener("ended", () => {
+      if (isRepeat) {
+        audio.currentTime = 0;
+        audio.play();
+      } else {
+        nextSong();
+      }
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      seekBar.value = (audio.currentTime / audio.duration) * 100;
+      currentTime.textContent = formatTime(audio.currentTime);
+    });
+
+    seekBar.addEventListener("input", () => {
+      audio.currentTime = (seekBar.value / 100) * audio.duration;
+    });
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? "0" + s : s}`;
+    }
+
+    playPauseBtn.addEventListener("click", playPause);
+    nextBtn.addEventListener("click", nextSong);
+    prevBtn.addEventListener("click", prevSong);
+    repeatBtn.addEventListener("click", toggleRepeat);
+    shuffleBtn.addEventListener("click", toggleShuffle);
+
+    loadSong(currentIndex);
+  </script>
+</body>
+</html>
